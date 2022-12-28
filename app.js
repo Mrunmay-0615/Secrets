@@ -7,7 +7,7 @@ const bodyParser = require("body-parser");
 const app = express();
 const PORT = process.env.PORT || 3000;
 const mongoose = require("mongoose")
-const encrypt = require("mongoose-encryption");
+const md5 = require("md5");
 
 app.use(bodyParser.urlencoded({extended:true}));
 app.set('view engine', 'ejs');
@@ -19,13 +19,6 @@ const userSchema = new mongoose.Schema({
     email:String,
     password:String
 });
-
-
-//userSchema.plugin(encrypt, {secret:secret}); -> This will encrypt all the fields.
-// To only encrypt certain fields use this:
-userSchema.plugin(encrypt, {secret:process.env.SECRET, encryptedFields:['password']});
-//We don't have to do anything special in the login section
-// It will encrypt when you call save() and decrypt when you call find()
 
 const User = new mongoose.model("User", userSchema);
 
@@ -39,7 +32,7 @@ app.get("/login", function(req, res){
 
 app.post("/login", function(req, res){
     const username = req.body.username;
-    const password = req.body.password;
+    const password = md5(req.body.password);
     User.findOne({email:username}, function(err, foundUser){
         if(err) {console.log(err);}
         else if(!foundUser) {res.send("Invalid Username");}
@@ -53,11 +46,9 @@ app.get("/register", function(req, res){
 });
 
 app.post("/register", function(req, res){
-    username = req.body.username;
-    password = req.body.password;
     const newUser = new User({
-        email:username,
-        password:password
+        email:req.body.username,
+        password:md5(req.body.password)
     });
     newUser.save(function(err){
         if(err) {console.log(err);}
