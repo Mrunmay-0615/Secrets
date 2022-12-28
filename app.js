@@ -1,5 +1,6 @@
 //jshint esversion:6
 
+require("dotenv").config();
 const express = require("express");
 const ejs = require("ejs");
 const bodyParser = require("body-parser");
@@ -19,10 +20,10 @@ const userSchema = new mongoose.Schema({
     password:String
 });
 
-const secret = "IamGay.";
+
 //userSchema.plugin(encrypt, {secret:secret}); -> This will encrypt all the fields.
 // To only encrypt certain fields use this:
-userSchema.plugin(encrypt, {secret:secret, encryptedFields:['password']});
+userSchema.plugin(encrypt, {secret:process.env.SECRET, encryptedFields:['password']});
 //We don't have to do anything special in the login section
 // It will encrypt when you call save() and decrypt when you call find()
 
